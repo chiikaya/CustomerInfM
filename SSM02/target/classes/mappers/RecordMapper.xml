@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.RecordMapper">
+
+    <!--  联系记录 contact_record      查询条件 ： 客户姓名 ，联系类型 ，联系主题 -->
+    <!--1. 查询条数-->
+    <select id="findRecordCount" parameterType="map"
+            resultType="int">
+        select count(contact_record.record_id)
+        from contact_record left outer join sys_client on contact_record.client_id=sys_client.client_id
+        left outer join contcat_person as p on contact_record.record_who=p.person_id
+        <where>
+            <if test="byREName!=null and byREName!=''">
+                and sys_client.clientname like concat(concat('%',#{byREName}),'%')
+            </if>
+            <if test="byREType!=null and byREType!=''">
+                and contact_record.record_type like concat(concat('%',#{byREType}),'%')
+            </if>
+            <if test="byREText!=null and byREText!=''">
+                and contact_record.record_text like concat(concat('%',#{byREText}),'%')
+            </if>
+            and contact_record.inuse = 0
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllRecord" parameterType="map"
+            resultType="map">
+        select contact_record.record_id as id,sys_client.clientname as text,sys_client.client_id,
+        contact_record.create_time,contact_record.reply_time,contact_record.record_type,
+        p.person_name,p.person_id,contact_record.record_text,contact_record.record_desc
+        from contact_record left outer join sys_client on contact_record.client_id=sys_client.client_id
+        left outer join contcat_person as p on contact_record.record_who=p.person_id
+        <where>
+            <if test="byREName!=null and byREName!=''">
+                and sys_client.clientname like concat(concat('%',#{byREName}),'%')
+            </if>
+            <if test="byREType!=null and byREType!=''">
+                and contact_record.record_type like concat(concat('%',#{byREType}),'%')
+            </if>
+            <if test="byREText!=null and byREText!=''">
+                and contact_record.record_text like concat(concat('%',#{byREText}),'%')
+            </if>
+            and contact_record.inuse = 0
+        </where>
+
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!-- 3.添加联系记录-->
+    <!--record_id,record_name,create_time,reply_time, record_type,record_who,record_text,record_desc-->
+    <insert id="addRecord" parameterType="map">
+        insert into contact_record (client_id,create_time,reply_time,record_type,record_who,record_text,record_desc)
+        values(#{client_id},#{create_time},#{reply_time},#{record_type},#{record_who},#{record_text},#{record_desc})
+    </insert>
+
+    <!--4. 修改联系记录-->
+    <update id="updateRecord" parameterType="map">
+        update contact_record set
+        client_id=#{client_id},
+        create_time=#{create_time},
+        reply_time=#{reply_time},
+        record_type=#{record_type},
+        record_who=#{record_who},
+        record_text=#{record_text},
+        record_desc=#{record_desc}
+        where record_id = #{record_id}
+    </update>
+
+
+
+    <!-- 真删除
+    <delete id="deleteRecord" parameterType="int">
+        delete from contact_record where record_id=#{record_id}
+    </delete>
+    -->
+    <!--5.删除联系记录  假删除 -->
+    <update id="deleteRecord" parameterType="int">
+        update contact_record
+        set inuse = 1
+        where record_id=#{record_id}
+    </update>
+
+
+
+
+    <!--      获取下拉列表中的内容         -->
+
+    <!--客户 -->
+    <select id="getKH" resultType="map">
+        select client_id as id,clientname as name from sys_client
+        where inuse =0
+    </select>
+
+    <!--联系人姓名 -->
+    <select id="getPerson" resultType="map">
+        select person_id as id,person_name as name from contcat_person
+        where inuse =0
+    </select>
+
+</mapper>

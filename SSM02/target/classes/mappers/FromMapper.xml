@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.FromMapper">
+
+    <!-- 客户来源 sys_from -->
+
+
+    <!--1. 查询条数   where username like concat(concat('%',#{value}),'%')-->
+    <select id="findFromCount" parameterType="map"
+            resultType="int">
+        select count(from_id)
+        from sys_from
+        <where>
+            <if test="from_name!=null and from_name!=''">
+                and from_name like concat(concat('%',#{from_name}),'%')
+            </if>
+            and inuse=0
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllFrom" parameterType="map"
+            resultType="map">
+        select from_id as id ,from_name as text
+        from sys_from
+        <where>
+            <if test="from_name!=null and from_name!=''">
+                and from_name like concat(concat('%',#{from_name}),'%')
+            </if>
+            and inuse=0
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!--3.添加-->
+    <insert id="addFrom" parameterType="map">
+        insert into sys_from (from_name)
+        values(#{from_name})
+    </insert>
+
+    <!--4. 修改 -->
+    <update id="updateFrom" parameterType="map">
+        update sys_from set
+        from_name=#{from_name}
+        where from_id = #{from_id}
+    </update>
+
+    <!--5. 假删-->
+    <update id="deleteFrom" parameterType="int">
+        update sys_from
+        set inuse = 1
+        where from_id = #{from_id}
+    </update>
+
+
+</mapper>

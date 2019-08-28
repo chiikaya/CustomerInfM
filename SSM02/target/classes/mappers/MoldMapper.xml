@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.MoldMapper">
+
+    <!-- 客户类型 sys_mold -->
+
+
+    <!--1. 查询条数   where username like concat(concat('%',#{value}),'%')-->
+    <select id="findMoldCount" parameterType="map"
+            resultType="int">
+        select count(mold_id)
+        from sys_mold
+        <where>
+            <if test="mold_name!=null and mold_name!=''">
+                and mold_name like concat(concat('%',#{mold_name}),'%')
+            </if>
+            and inuse=0
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllMold" parameterType="map"
+            resultType="map">
+        select mold_id as id ,mold_name as text
+        from sys_mold
+        <where>
+            <if test="mold_name!=null and mold_name!=''">
+                and mold_name like concat(concat('%',#{mold_name}),'%')
+            </if>
+            and inuse=0
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!--3.添加-->
+    <insert id="addMold" parameterType="map">
+        insert into sys_mold (mold_name)
+        values(#{mold_name})
+    </insert>
+
+    <!--4. 修改 -->
+    <update id="updateMold" parameterType="map">
+        update sys_mold set
+        mold_name=#{mold_name}
+        where mold_id = #{mold_id}
+    </update>
+
+    <!--5. 假删-->
+    <update id="deleteMold" parameterType="int">
+        update sys_mold
+        set inuse = 1
+        where mold_id = #{mold_id}
+    </update>
+
+
+</mapper>

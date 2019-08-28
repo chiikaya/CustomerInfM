@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.DescMapper">
+
+    <!-- 员工信息  staff_desc -->
+<!--
+   staff_id,staff_name,staff_age,staff_sex,staff_nation,staff_dept,staff_role,
+   staff_degree,staff_marital,staff_address,staff_phone,staff_tel,staff_email
+-->
+    <!--1. 查询条数-->
+    <select id="findDescCount" parameterType="map"
+            resultType="int">
+        select count(d.staff_id)
+        from staff_desc as d left outer join sys_dept as e on d.staff_dept=e.dept_id
+        left outer join sys_role as r on d.staff_role=r.role_id
+        <where>
+            <if test="byDescName1!=null and byDescName1!=''">
+                and d.staff_name like concat(concat('%',#{byDescName1}),'%')
+            </if>
+            <if test="byDept1!=null and byDept1!=''">
+                and e.dept_name like concat(concat('%',#{byDept1}),'%')
+            </if>
+            <if test="byRole1!=null and byRole1!=''">
+                and r.role_name like concat(concat('%',#{byRole1}),'%')
+            </if>
+            <if test="byDegree1!=null and byDegree1!=''">
+                and d.staff_degree like concat(concat('%',#{byDegree1}),'%')
+            </if>
+            and d.inuse = 0
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllDesc" parameterType="map"
+            resultType="map" >
+        select d.staff_id as id,d.staff_name as text,d.staff_age,d.staff_sex,
+        d.staff_nation,e.dept_name,e.dept_id,r.role_name,r.role_id, d.staff_degree,d.staff_marital,
+        d.staff_address, d.staff_phone,d.staff_tel,d.staff_email
+        from staff_desc as d left outer join sys_dept as e on d.staff_dept=e.dept_id
+        left outer join sys_role as r on d.staff_role=r.role_id
+        <where>
+            <if test="byDescName1!=null and byDescName1!=''">
+                and d.staff_name like concat(concat('%',#{byDescName1}),'%')
+            </if>
+            <if test="byDept1!=null and byDept1!=''">
+                and e.dept_name like concat(concat('%',#{byDept1}),'%')
+            </if>
+            <if test="byRole1!=null and byRole1!=''">
+                and r.role_name like concat(concat('%',#{byRole1}),'%')
+            </if>
+            <if test="byDegree1!=null and byDegree1!=''">
+                and d.staff_degree like concat(concat('%',#{byDegree1}),'%')
+            </if>
+            and d.inuse = 0
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!--3.添加员工信息-->
+    <insert id="addDesc" parameterType="map">
+      insert into staff_desc(staff_name,staff_age,staff_sex,staff_nation,staff_dept,staff_role,
+                      staff_degree,staff_marital,staff_address,staff_phone,staff_tel,staff_email)
+      values(#{staff_name},#{staff_age},#{staff_sex},#{staff_nation},#{staff_dept},#{staff_role},#{staff_degree},#{staff_marital},#{staff_address},#{staff_phone},#{staff_tel},#{staff_email})
+    </insert>
+
+    <!--4. 修改员工信息 -->
+    <update id="updateDesc" parameterType="map">
+        update staff_desc set
+        staff_name=#{staff_name},
+        staff_age= #{staff_age},
+        staff_sex=#{staff_sex},
+        staff_nation=#{staff_nation},
+        staff_dept=#{staff_dept},
+        staff_role=#{staff_role},
+        staff_degree=#{staff_degree},
+        staff_marital=#{staff_marital},
+        staff_address=#{staff_address},
+        staff_phone=#{staff_phone},
+        staff_tel=#{staff_tel},
+        staff_email=#{staff_email}
+        where staff_id = #{staff_id}
+    </update>
+
+
+
+    <!-- 5.假删员工-->
+    <update id="deleteDesc" parameterType="int">
+        update staff_desc
+        set inuse = 1
+        where staff_id = #{staff_id}
+    </update>
+
+
+    <!--      获取下拉列表中的内容         -->
+
+    <!--7.部门-->
+    <select id="getDept" resultType="map">
+        select dept_id as id,dept_name as name from sys_dept
+        where inuse =0
+    </select>
+
+    <!--8.角色-->
+    <select id="getRole" resultType="map">
+        select role_id as id,role_name as name from sys_role
+        where inuse =0
+    </select>
+
+
+
+
+</mapper>

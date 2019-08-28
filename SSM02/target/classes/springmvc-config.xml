@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+    <!--1.开启注解功能   以 context 结尾
+     use-default-filters="false" : 不使用默认的扫描规则  -->
+    <context:component-scan base-package="com.oaec" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--2.创建MVC注解功能    一定要选以 MVC 结尾的-->
+    <mvc:annotation-driven/>
+
+    <!--3.配置内部资源视图解析器-->
+    <!--mvc的Controller层会返回一个字符串，比如"success"
+     视图解析器 会把   前缀+字符串+后缀  拼接起来，这就是对
+     用户的响应
+          /WEB-INF/views/success.jsp
+          -->
+    <bean id="resolver"
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+
+    <!--  访问静态资源 -->
+    <!--mapping:表示对该资源的请求，后面是两个**      location：静态资源所在目录-->
+    <mvc:resources mapping="/static/**" location="/static/"/>
+
+    <!--登录验证拦截器-->
+    <mvc:interceptors>
+       <mvc:interceptor>
+           <mvc:mapping path="/**"/>
+           <mvc:exclude-mapping path="/login.jsp"/>
+           <mvc:exclude-mapping path="/sys/userLogin"/>
+           <mvc:exclude-mapping path="/static/**"/>
+          <bean class="com.oaec.controller.LoginInterceptor"></bean>
+       </mvc:interceptor>
+    </mvc:interceptors>
+
+</beans>

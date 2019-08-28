@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.PersonMapper">
+
+    <!--  联系记录 contcat_person        查询条件 ： 属于的客户 ，联系人姓名 -->
+
+
+    <!--1. 查询条数-->
+    <select id="findPersonCount" parameterType="map"
+            resultType="int">
+        select count(p.person_id)
+        from contcat_person as p left outer join sys_client as c on p.person_customer=c.client_id
+        <where>
+            <if test="byPEName!=null and byPEName!=''">
+                and p.person_name like concat(concat('%',#{byPEName}),'%')
+            </if>
+            <if test="byPEKH!=null and byPEKH!=''">
+                and c.clientname like concat(concat('%',#{byPEKH}),'%')
+            </if>
+            and p.inuse = 0
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllPerson" parameterType="map"
+            resultType="map">
+        select  p.person_id as id,c.clientname as text,c.client_id,p.person_name,p.person_sex,p.person_age,p.person_post,p.person_tel,p.customer_nexus
+        from contcat_person as p left outer join sys_client as c on p.person_customer=c.client_id
+        <where>
+            <if test="byPEName!=null and byPEName!=''">
+                and p.person_name like concat(concat('%',#{byPEName}),'%')
+            </if>
+            <if test="byPEKH!=null and byPEKH!=''">
+                and c.clientname like concat(concat('%',#{byPEKH}),'%')
+            </if>
+            and p.inuse = 0
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!-- 3.添加联系人-->
+    <!--person_id,person_customer,person_name,person_sex,person_age,person_post,person_tel,customer_nexus-->
+    <insert id="addPerson" parameterType="map">
+        insert into contcat_person (person_customer,person_name,person_sex,person_age,person_post,person_tel,customer_nexus)
+        values(#{person_customer},#{person_name},#{person_sex},#{person_age},#{person_post},#{person_tel},#{customer_nexus})
+    </insert>
+
+    <!--4. 修改联系人-->
+    <update id="updatePerson" parameterType="map">
+        update contcat_person set
+        person_customer=#{person_customer},
+        person_name=#{person_name},
+        person_sex=#{person_sex},
+        person_age=#{person_age},
+        person_post=#{person_post},
+        person_tel=#{person_tel},
+        customer_nexus=#{customer_nexus}
+        where person_id = #{person_id}
+    </update>
+
+
+    <!--5.删除联系人 -->
+    <!--<delete id="deletePerson" parameterType="int">
+        delete from contcat_person where person_id=#{person_id}
+    </delete>-->
+    <update id="deletePerson" parameterType="int">
+        update contcat_person
+        set inuse = 1
+        where person_id=#{person_id}
+    </update>
+
+
+
+<!--      获取下拉列表中的内容         -->
+
+    <!--客户 -->
+    <select id="getPersonKH" resultType="map">
+        select client_id as id,clientname as name from sys_client
+        where inuse =0
+    </select>
+
+</mapper>

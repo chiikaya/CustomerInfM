@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.UserMapper">
+
+  <!--用户-->
+
+    <!--1. 查询条数   where username like concat(concat('%',#{value}),'%')-->
+    <select id="findUserCount" parameterType="map"
+            resultType="int">
+        select count(user_id)
+        from sys_user
+        <where>
+            <if test="username!=null and username!=''">
+                and username like concat(concat('%',#{username}),'%')
+            </if>
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <!--select user_id as id ,username as text,password,tel,email,inuse,dept_id
+        from sys_user-->
+    <select id="findAllUser" parameterType="map"
+            resultType="map">
+        select sys_user.user_id as id,sys_user.username as text,sys_user.password,
+        sys_user.tel,sys_user.email,sys_dept.dept_name,sys_dept.dept_id,sys_user.inuse
+        from sys_user left outer join sys_dept
+        on sys_user.dept_id = sys_dept.dept_id
+        <where>
+            <if test="username!=null and username!=''">
+                and username like concat(concat('%',#{username}),'%')
+            </if>
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!-- 3.添加用户-->
+    <insert id="addUser" parameterType="map">
+        insert into sys_user (username,password,tel,email,dept_id,inuse)
+        values(#{username},#{password},#{tel},#{email},#{dept_id},#{inuse})
+    </insert>
+
+
+    <!--4. 修改用户-->
+    <update id="updateUser" parameterType="map">
+        update sys_user set
+        username=#{username},
+        password=#{password},
+        tel=#{tel},
+        email=#{email},
+        dept_id=#{dept_id},
+        inuse=#{inuse}
+        where user_id = #{user_id}
+    </update>
+
+     <!--5. 查询所有有效角色-->
+     <select id="getAllInvalidRole" resultType="map">
+       select  role_id as id ,role_name as text,role_desc,role_order,inuse
+        from sys_role
+        where inuse=0
+        order by role_order
+     </select>
+
+    <!--6.根据员工编号查询有效角色-->
+     <select id="getInvalidRoleByUserId" parameterType="int" resultType="int">
+         select DISTINCT role_id
+         from sys_user_role
+         where user_id=#{user_id}
+         order by role_id
+     </select>
+
+      <!--7.删除当前用户在中间表中的所有记录-->
+      <delete id="deleteAllRoleOfUser" parameterType="int">
+          delete from sys_user_role where user_id=#{user_id}
+      </delete>
+
+      <!--8. 插入当前用户的所有角色-->
+      <insert id="addRoleOfUser" parameterType="list">
+          insert into sys_user_role (user_id,role_id) values
+          <foreach collection="list" item="item"
+                   open=" " close=" " separator=",">
+              (#{item.user_id},#{item.role_id})
+          </foreach>
+      </insert>
+
+    <!--9. 删除用户-->
+    <delete id="deleteUser" parameterType="int">
+        delete from sys_user where user_id = #{user_id}
+    </delete>
+
+    <!-- 10.保存部门-->
+    <update id="saveDptOfUser" parameterType="map">
+        update  sys_user set dept_id = #{dept_id}
+        where user_id = #{user_id}
+    </update>
+
+    <!--11.查询所有的部门-->
+    <select id="getAllInvalidDpt" resultType="map">
+        select dept_id as id,dept_name as text
+        from sys_dept
+        where inuse = 0
+    </select>
+
+    <!--12.根据用户编号查询有效部门-->
+    <select id="getInvalidDptByUserId" parameterType="int"
+            resultType="map">
+        select sys_dept.dept_id as id
+        from sys_user left outer join sys_dept
+        on sys_user.dept_id = sys_dept.dept_id
+        where sys_user.inuse = 0 and sys_user.user_id = #{user_id};
+    </select>
+
+
+    <!--13.所属部门-->
+    <select id="getUSDept" resultType="map">
+        select dept_id as id,dept_name as name from sys_dept
+        where inuse =0
+    </select>
+</mapper>

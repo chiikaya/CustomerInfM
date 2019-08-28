@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.AllotMapper">
+
+    <!-- 客户分配 sys_allot-->
+
+    <!--1. 查询条数   按创建时间降序  -->
+    <select id="findAllotCount" parameterType="map"
+            resultType="int">
+        select count(allot_id)
+        from sys_allot order by create_time DESC
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllAllot" parameterType="map"
+            resultType="map">
+        select allot_id as id ,allot_name as text,allot_inuse,allot_source,allot_type,create_time,company
+        from sys_allot order by create_time DESC
+        limit #{startIndex},#{pageSize}
+    </select>
+</mapper>

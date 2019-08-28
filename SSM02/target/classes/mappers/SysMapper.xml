@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.SysMapper">
+
+    <!--1. 用户登录-->
+    <select id="userLogin" parameterType="map" resultType="map">
+        select * from sys_user where
+        username=#{username} and password = #{password}
+    </select>
+
+    <!--2. 根据用户id查询用户所有的菜单权限-->
+    <select id="getAllAuthByUserId" parameterType="int" resultType="map">
+        select auth_id as id ,auth_name as text,auth_desc,auth_layer,auth_url,auth_order,parent_id,auth_type,inuse
+        from sys_auth
+        where auth_id in(
+        select auth_id from sys_role_auth where role_id in(
+        select role_id from sys_user_role where user_id=#{user_id}
+        )
+        )
+         and auth_type=0
+         order by auth_layer,auth_order
+    </select>
+
+    <!--3.根据用户id查询用户所有的资源权限-->
+    <select id="getAllResourceByUserId" parameterType="int" resultType="map">
+        select auth_id as id ,auth_name as text,auth_desc,auth_layer,auth_url,auth_order,parent_id,auth_type,inuse
+        from sys_auth
+        where auth_id in(
+        select auth_id from sys_role_auth where role_id in(
+        select role_id from sys_user_role where user_id=#{user_id}
+        )
+        )
+        and auth_type=1
+        order by auth_layer,auth_order
+    </select>
+
+
+</mapper>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.ThoughtMapper">
+
+    <!--客户关怀 sys_thought       查询条件 ： 客户姓名 ，关怀主题 ，关怀方式 -->
+
+    <!--1. 查询条数-->
+    <select id="findThoughtCount" parameterType="map"
+            resultType="int">
+        select count(sys_thought.thought_id)
+        from sys_thought left outer join sys_client
+        on sys_thought.client_id = sys_client.client_id
+        <where>
+            <if test="byKH!=null and byKH!=''">
+                and sys_client.clientname like concat(concat('%',#{byKH}),'%')
+            </if>
+            <if test="byText!=null and byText!=''">
+                and sys_thought.thought_text like concat(concat('%',#{byText}),'%')
+            </if>
+            <if test="byWay!=null and byWay!=''">
+                and sys_thought.thought_way like concat(concat('%',#{byWay}),'%')
+            </if>
+            and sys_thought.inuse = 0
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllThought" parameterType="map"
+            resultType="map">
+        select sys_thought.thought_id as id,sys_client.clientname as text,sys_client.client_id,sys_thought.thought_text,
+        sys_thought.thought_way,sys_thought.create_time,sys_thought.reply_time,
+        sys_thought.thought_desc,sys_thought.person,sys_client.clientname
+        from sys_thought left outer join sys_client
+        on sys_thought.client_id = sys_client.client_id
+        <where>
+            <if test="byKH!=null and byKH!=''">
+                and sys_client.clientname like concat(concat('%',#{byKH}),'%')
+            </if>
+            <if test="byText!=null and byText!=''">
+                and sys_thought.thought_text like concat(concat('%',#{byText}),'%')
+            </if>
+            <if test="byWay!=null and byWay!=''">
+                and sys_thought.thought_way like concat(concat('%',#{byWay}),'%')
+            </if>
+            and sys_thought.inuse = 0
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!-- 3.添加客户关怀-->
+    <!--thought_id,thought_name,thought_text,thought_way,create_time,reply_time,thought_desc -->
+    <insert id="addThought" parameterType="map">
+        insert into sys_thought (client_id,thought_text,thought_way,create_time,reply_time,thought_desc,person)
+        values(#{client_id},#{thought_text},#{thought_way},#{create_time},#{reply_time},#{thought_desc},#{person})
+    </insert>
+
+    <!--4. 修改客户关怀-->
+    <update id="updateThought" parameterType="map">
+        update sys_thought set
+        client_id = #{client_id},
+        thought_text=#{thought_text},
+        thought_way=#{thought_way},
+        create_time=#{create_time},
+        reply_time=#{reply_time},
+        thought_desc=#{thought_desc},
+        person=#{person}
+        where thought_id = #{thought_id}
+    </update>
+
+
+    <!--5.删除客户 -->
+    <delete id="deleteThought" parameterType="int">
+        delete from sys_thought where thought_id=#{thought_id}
+    </delete>
+
+
+    <!--      获取下拉列表中的内容         -->
+
+    <!--客户 -->
+    <select id="getKH" resultType="map">
+        select client_id as id,clientname as name from sys_client
+        where inuse =0
+    </select>
+
+</mapper>

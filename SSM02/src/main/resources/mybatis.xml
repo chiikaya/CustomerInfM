@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!--&lt;!&ndash;定义别名 :非限定类名，或首字母小写的非限定类名 &ndash;&gt;
+   <typeAliases>
+      &lt;!&ndash; 单个别名定义&ndash;&gt;
+      &lt;!&ndash;<typeAlias type="com.oaec.entity" alias="Phone"/>&ndash;&gt;
+        &lt;!&ndash;批量别名定义 &ndash;&gt;
+        <package name="com.oaec.entity"/>
+         &lt;!&ndash;在UserMapper.xml 的 resultType 或 parameterType 直接写UserInfo(userInfo) 就可以&ndash;&gt;
+    </typeAliases>-->
+
+</configuration>

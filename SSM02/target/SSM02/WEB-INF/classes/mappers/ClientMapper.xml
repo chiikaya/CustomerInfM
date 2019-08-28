@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.ClientMapper">
+
+    <!-- 客户信息  sys_client -->
+
+    <!--1. 查询条数-->
+    <select id="findClientCount" parameterType="map"
+            resultType="int">
+        select count(sys_client.client_id)
+        from sys_client left outer join sys_status on sys_client.status_id=sys_status.status_id
+        left outer join sys_from on sys_client.from_id=sys_from.from_id
+        left outer join staff_desc on sys_client.staff_id=staff_desc.staff_id
+        left outer join sys_mold on sys_client.mold_id=sys_mold.mold_id
+        <where>
+            <if test="byName!=null and byName!=''">
+                and sys_client.clientname like concat(concat('%',#{byName}),'%')
+            </if>
+            <if test="byStatus!=null and byStatus!=''">
+                and sys_status.status_inuse like concat(concat('%',#{byStatus}),'%')
+            </if>
+            <if test="byType!=null and byType!=''">
+                and sys_mold.mold_name like concat(concat('%',#{byType}),'%')
+            </if>
+            <if test="byStaff!=null and byStaff!=''">
+                and staff_desc.staff_name like concat(concat('%',#{byStaff}),'%')
+            </if>
+            <if test="byCompany!=null and byCompany!=''">
+                and sys_client.company like concat(concat('%',#{byCompany}),'%')
+            </if>
+            and sys_client.inuse = 0
+        </where>
+
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllClient" parameterType="map"
+            resultType="map" >
+        select sys_client.client_id as id ,sys_client.clientname as text,sys_status.status_inuse,sys_status.status_id,
+        sys_from.from_name,sys_from.from_id,staff_desc.staff_name,staff_desc.staff_id,sys_mold.mold_name,sys_mold.mold_id,sys_client.sex,sys_client.tel,sys_client.QQ,sys_client.email,
+        sys_client.post,sys_client.company
+        from sys_client left outer join sys_status on sys_client.status_id=sys_status.status_id
+        left outer join sys_from on sys_client.from_id=sys_from.from_id
+        left outer join staff_desc on sys_client.staff_id=staff_desc.staff_id
+        left outer join sys_mold on sys_client.mold_id=sys_mold.mold_id
+        <where>
+        <if test="byName!=null and byName!=''">
+            and sys_client.clientname like concat(concat('%',#{byName}),'%')
+        </if>
+            <if test="byFrom!=null and byFrom!=''">
+                and sys_from.from_name like concat(concat('%',#{byFrom}),'%')
+            </if>
+        <if test="byStatus!=null and byStatus!=''">
+            and sys_status.status_inuse like concat(concat('%',#{byStatus}),'%')
+        </if>
+        <if test="byType!=null and byType!=''">
+            and sys_mold.mold_name like concat(concat('%',#{byType}),'%')
+        </if>
+        <if test="byStaff!=null and byStaff!=''">
+            and staff_desc.staff_name like concat(concat('%',#{byStaff}),'%')
+        </if>
+        <if test="byCompany!=null and byCompany!=''">
+            and sys_client.company like concat(concat('%',#{byCompany}),'%')
+        </if>
+            and sys_client.inuse = 0
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+
+    <!--3.添加客户信息-->
+    <insert id="addClient" parameterType="map">
+        insert into sys_client (clientname,status_id,from_id,staff_id,mold_id,sex,tel,QQ,email,post,company)
+        values(#{clientname},#{status_id},#{from_id},#{staff_id},#{mold_id},#{sex},#{tel},#{QQ},#{email},#{post},#{company})
+    </insert>
+
+    <!--4. 修改客户信息 -->
+    <update id="updateClient" parameterType="map">
+        update sys_client set
+        clientname=#{clientname},
+        status_id= #{status_id},
+        from_id=#{from_id},
+        staff_id=#{staff_id},
+        mold_id=#{mold_id},
+        sex=#{sex},
+        tel=#{tel},
+        QQ=#{QQ},
+        email=#{email},
+        post=#{post},
+        company=#{company}
+        where client_id = #{client_id}
+    </update>
+
+
+
+    <!-- 假删客户-->
+    <update id="deleteClient" parameterType="int">
+        update sys_client
+        set inuse = 1
+        where client_id = #{client_id}
+    </update>
+
+
+
+
+ <!--      获取下拉列表中的内容         -->
+
+    <!--5.客户状态 -->
+    <select id="getStatus" resultType="map">
+        select status_id as id,status_inuse as name from sys_status
+         where inuse =0
+    </select>
+
+    <!--6.客户来源 -->
+    <select id="getFrom" resultType="map">
+        select from_id as id,from_name as name from sys_from
+         where inuse =0
+
+    </select>
+
+    <!--7.所属员工-->
+    <select id="getStaff" resultType="map">
+        select staff_id as id,staff_name as name from staff_desc
+         where inuse =0
+    </select>
+
+    <!--8.客户类型 -->
+    <select id="getMold" resultType="map">
+        select mold_id as id,mold_name as name from sys_mold
+         where inuse =0
+    </select>
+
+
+</mapper>

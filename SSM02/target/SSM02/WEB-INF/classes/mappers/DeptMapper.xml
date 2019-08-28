@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.DeptMapper">
+
+<!-- 部门管理  查询条件 ：部门名称 ，描述 -->
+
+    <!--1. 查询条数-->
+    <select id="findDeptCount" parameterType="map"
+            resultType="int">
+        select count(dept_id)
+        from sys_dept
+        <where>
+            <if test="dept_name!=null and dept_name!=''">
+                and dept_name like concat(concat('%',#{dept_name}),'%')
+            </if>
+            <if test="dept_desc!=null and dept_desc!=''">
+                and dept_desc like concat(concat('%',#{dept_desc}),'%')
+            </if>
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllDept" parameterType="map"
+            resultType="map">
+        select dept_id as id ,dept_name as text,dept_desc,dept_location,inuse
+        from sys_dept
+        <where>
+            <if test="dept_name!=null and dept_name!=''">
+                and dept_name like concat(concat('%',#{dept_name}),'%')
+            </if>
+            <if test="dept_desc!=null and dept_desc!=''">
+                and dept_desc like concat(concat('%',#{dept_desc}),'%')
+            </if>
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!--3.添加部门-->
+    <insert id="addDept" parameterType="map">
+        insert into sys_dept (dept_name,dept_desc,dept_location,inuse)
+        values(#{dept_name},#{dept_desc},#{dept_location},#{inuse})
+    </insert>
+
+    <!--4. 修改部门 -->
+    <update id="updateDept" parameterType="map">
+        update sys_dept set
+        dept_name=#{dept_name},
+        dept_desc=#{dept_desc},
+        dept_location=#{dept_location},
+        inuse=#{inuse}
+        where dept_id = #{dept_id}
+    </update>
+
+    <!-- 5.假删部门-->
+
+    <delete id="deleteDept" parameterType="int">
+        delete from sys_dept where dept_id = #{dept_id}
+    </delete>
+
+   <!-- <update id="deleteDept" parameterType="int">
+        update sys_dept set inuse = 1
+        where dept_id = #{dept_id}
+    </update>
+-->
+
+    <!-- 6.查询出被删除部门下的所有员工-->
+    <select id="findUser4DeleteDept" parameterType="int" resultType="Integer">
+        select sys_user.user_id
+        from  sys_user LEFT outer JOIN sys_dept
+        on sys_user.dept_id = sys_dept.dept_id
+        where sys_dept.dept_id= #{dept_id}
+    </select>
+
+    <!-- 7.修改被删除员工的部门-->
+    <update id="updateUserDept" parameterType="list">
+            update sys_user set dept_id = 0
+            <where>
+                user_id in
+                <foreach collection="list" item="item" index="index"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </where>
+    </update>
+
+
+
+</mapper>

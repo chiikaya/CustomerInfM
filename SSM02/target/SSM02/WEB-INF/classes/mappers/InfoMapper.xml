@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.InfoMapper">
+
+    <!-- 房屋信息 house_info -->
+
+    <!--1. 查询条数   where username like concat(concat('%',#{value}),'%')-->
+    <select id="findInfoCount" parameterType="map"
+            resultType="int">
+        select count(h.info_id)
+        from house_info as h left outer join house_type as t on h.type_id=t.type_id
+        left outer join staff_desc as s on h.staff_id=s.staff_id
+        <where>
+            <if test="byInfoType!=null and byInfoType!=''">
+                and t.type_name like concat(concat('%',#{byInfoType}),'%')
+            </if>
+            <if test="byInfoAdress!=null and byInfoAdress!=''">
+                and h.info_adress like concat(concat('%',#{byInfoAdress}),'%')
+            </if>
+            and h.inuse=0
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllInfo" parameterType="map"
+            resultType="map">
+        select h.info_id as id,t.type_name as text ,t.type_id,s.staff_name,s.staff_id,h.info_adress,h.info_price
+        from house_info as h left outer join house_type as t on h.type_id=t.type_id
+        left outer join staff_desc as s on h.staff_id=s.staff_id
+        <where>
+            <if test="byInfoType!=null and byInfoType!=''">
+                and t.type_name like concat(concat('%',#{byInfoType}),'%')
+            </if>
+            <if test="byInfoAdress!=null and byInfoAdress!=''">
+                and h.info_adress like concat(concat('%',#{byInfoAdress}),'%')
+            </if>
+            and h.inuse=0
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!--3.添加-->
+    <insert id="addInfo" parameterType="map">
+        insert into house_info (type_id,staff_id,info_adress,info_price)
+        values(#{type_id},#{staff_id},#{info_adress},#{info_price})
+    </insert>
+
+    <!--4. 修改 -->
+    <update id="updateInfo" parameterType="map">
+        update house_info set
+        type_id=#{type_id},
+        staff_id=#{staff_id},
+        info_adress=#{info_adress},
+        info_price=#{info_price}
+        where info_id = #{info_id}
+    </update>
+
+    <!-- 5.假删员工-->
+    <update id="deleteInfo" parameterType="int">
+        update house_info
+        set inuse = 1
+        where info_id = #{info_id}
+    </update>
+
+
+    <!--      获取下拉列表中的内容         -->
+
+    <!--6.户型 -->
+    <select id="getType" resultType="map">
+        select type_id as id,type_name as name from house_type
+        where inuse =0
+    </select>
+
+    <!--7.管理员工 -->
+    <select id="getDesc2" resultType="map">
+        select staff_id as id,staff_name as name from staff_desc
+        where inuse =0
+    </select>
+</mapper>

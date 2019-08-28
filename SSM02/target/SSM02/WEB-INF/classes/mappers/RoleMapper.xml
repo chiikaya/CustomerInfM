@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.RoleMapper">
+
+   <!--角色管理   -->
+
+
+    <!--1. 查询条数-->
+    <select id="findRoleCount" parameterType="map"
+            resultType="int">
+        select count(role_id)
+        from sys_role
+        <where>
+            <if test="role_name!=null and role_name!=''">
+                and role_name like concat(concat('%',#{role_name}),'%')
+            </if>
+            <if test="role_desc!=null and role_desc!=''">
+                and role_desc like concat(concat('%',#{role_desc}),'%')
+            </if>
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllRole" parameterType="map"
+            resultType="map">
+        select role_id as id ,role_name as text,role_desc,role_order,inuse
+        from sys_role
+        <where>
+            <if test="role_name!=null and role_name!=''">
+                and role_name like concat(concat('%',#{role_name}),'%')
+            </if>
+            <if test="role_desc!=null and role_desc!=''">
+                and role_desc like concat(concat('%',#{role_desc}),'%')
+            </if>
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!--3.添加角色-->
+    <insert id="addRole" parameterType="map">
+        insert into sys_role (role_name,role_desc,role_order,inuse)
+        values(#{role_name},#{role_desc},#{role_order},#{inuse})
+    </insert>
+
+    <!--4. 修改角色 -->
+    <update id="updateRole" parameterType="map">
+        update sys_role set
+        role_name=#{role_name},
+        role_desc=#{role_desc},
+        role_order=#{role_order},
+        inuse=#{inuse}
+        where role_id = #{role_id}
+    </update>
+
+    <!--5. 查询所有有效权限-->
+    <select id="getAllInvalidAuth" resultType="map">
+      select  auth_id as id ,auth_name as text,auth_desc,auth_layer,auth_url,auth_order,
+       parent_id,auth_type,inuse
+       from sys_auth
+       where inuse=0
+       order by auth_layer,auth_order
+    </select>
+
+    <!--6.根据角色编号查询有效权限-->
+    <select id="getInvalidAuthByRoleId" parameterType="int" resultType="int">
+        select DISTINCT auth_id
+        from sys_role_auth
+        where role_id=#{role_id}
+        order by auth_id
+    </select>
+
+    <!--7.删除当前角色在中间表中的所有记录-->
+    <delete id="deleteAllAuthOfRole" parameterType="int">
+        delete from sys_role_auth where role_id=#{role_id}
+    </delete>
+
+    <!--8. 插入当前角色的所有权限-->
+    <insert id="addAuthOfRole" parameterType="list">
+        insert into sys_role_auth (role_id,auth_id) values
+        <foreach collection="list" item="item"
+                 open=" " close=" " separator=",">
+            (#{item.role_id},#{item.auth_id})
+        </foreach>
+    </insert>
+
+    <!--9.删除角色 -->
+    <delete id="deleteRole" parameterType="int">
+        delete from sys_role where role_id=#{role_id}
+    </delete>
+   <!-- <update id="deleteRole" parameterType="int">
+        update sys_role
+        set inuse = 1
+        where role_id=#{role_id}
+    </update>-->
+
+</mapper>

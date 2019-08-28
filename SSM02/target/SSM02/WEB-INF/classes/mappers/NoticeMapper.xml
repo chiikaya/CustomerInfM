@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.NoticeMapper">
+
+    <!--公告 notice       查询条件 ： 公告主题 ，公告内容 -->
+
+    <!--1. 查询条数-->
+    <select id="findNoticeCount" parameterType="map"
+            resultType="int">
+        select count(n.notice_id)
+        from notice as n left outer join staff_desc as s on n.notice_person=s.staff_id
+        <where>
+            <if test="Text!=null and Text!=''">
+                and n.notice_text like concat(concat('%',#{Text}),'%')
+            </if>
+            <if test="Content!=null and Content!=''">
+                and n.notice_content like concat(concat('%',#{Content}),'%')
+            </if>
+            and n.inuse = 0
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <select id="findAllNotice" parameterType="map"
+            resultType="map">
+        select n.notice_id as id,s.staff_name as text,s.staff_id,n.notice_text,n.notice_content,n.create_time,n.reply_time
+        from notice as n left outer join staff_desc as s on n.notice_person=s.staff_id
+        <where>
+            <if test="Text!=null and byKH!=''">
+                and n.notice_text like concat(concat('%',#{Text}),'%')
+            </if>
+            <if test="Content!=null and byText!=''">
+                and n.notice_content like concat(concat('%',#{Content}),'%')
+            </if>
+            and n.inuse = 0
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!-- 3.添加-->
+    <insert id="addNotice" parameterType="map">
+        insert into notice (notice_person,notice_text,notice_content,create_time,reply_time)
+        values(#{notice_person},#{notice_text},#{notice_content},#{create_time},#{reply_time})
+    </insert>
+
+    <!--4. 修改-->
+    <update id="updateNotice" parameterType="map">
+        update notice set
+        notice_person = #{notice_person},
+        notice_text=#{notice_text},
+        notice_content=#{notice_content},
+        create_time=#{create_time},
+        reply_time=#{reply_time}
+        where notice_id = #{notice_id}
+    </update>
+
+
+    <!--5.删除 -->
+    <update id="deleteNotice" parameterType="int">
+        update notice
+        set inuse = 1
+        where notice_id = #{notice_id}
+    </update>
+
+
+    <!--      获取下拉列表中的内容         -->
+
+    <!--员工姓名 -->
+    <select id="getDESC" resultType="map">
+        select staff_id as id,staff_name as name from staff_desc
+        where inuse =0
+    </select>
+
+</mapper>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.AuthMapper">
+
+  <!--权限-->
+
+
+    <!--1. 查询所有的权限-->
+    <select id="getAllAuth"  resultType="map">
+        select auth_id as id ,auth_name as text,auth_desc,auth_layer,auth_url,auth_order,parent_id,auth_type,inuse
+        from sys_auth order by auth_layer,auth_order
+    </select>
+
+    <!--2.添加权限 -->
+    <insert id="addAuth" parameterType="map">
+        insert into sys_auth (auth_name,auth_desc,auth_layer,parent_id,auth_url,auth_order,auth_type,inuse)
+        values(#{auth_name},#{auth_desc},#{auth_layer},#{parent_id},#{auth_url},#{auth_order},#{auth_type},#{inuse})
+    </insert>
+
+    <!--3. 修改权限 -->
+    <update id="updateAuth" parameterType="map">
+        update sys_auth set
+        auth_name=#{auth_name},
+        auth_desc=#{auth_desc},
+        auth_url=#{auth_url},
+        auth_order=#{auth_order},
+        auth_type=#{auth_type},
+        inuse=#{inuse}
+        where auth_id = #{auth_id}
+    </update>
+
+</mapper>

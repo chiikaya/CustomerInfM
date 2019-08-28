@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oaec.dao.StatusMapper">
+
+ <!-- 客户状态 sys_status -->
+
+
+    <!--1. 查询条数   where username like concat(concat('%',#{value}),'%')-->
+    <!-- 查询条件  ： 客户状态   -->
+    <select id="findStatusCount" parameterType="map"
+            resultType="int">
+        select count(status_id)
+        from sys_status
+        <where>
+            <if test="status_inuse!=null and status_inuse!=''">
+                and status_inuse like concat(concat('%',#{status_inuse}),'%')
+            </if>
+            and inuse=0
+        </where>
+    </select>
+
+    <!--2.查询数据-->
+    <!--  status_id,status_inuse,status_desc   -->
+    <select id="findAllStatus" parameterType="map"
+            resultType="map">
+        select status_id as id ,status_inuse as text,status_desc
+        from sys_status
+        <where>
+            <if test="status_inuse!=null and status_inuse!=''">
+                and status_inuse like concat(concat('%',#{status_inuse}),'%')
+            </if>
+            and inuse=0
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <!--3.添加-->
+    <insert id="addStatus" parameterType="map">
+        insert into sys_status (status_inuse,status_desc)
+        values(#{status_inuse},#{status_desc})
+    </insert>
+
+    <!--4. 修改 -->
+    <update id="updateStatus" parameterType="map">
+        update sys_status set
+        status_inuse=#{status_inuse},
+        status_desc=#{status_desc}
+        where status_id = #{status_id}
+    </update>
+
+    <!--5. 假删-->
+    <update id="deleteStatus" parameterType="int">
+        update sys_status
+        set inuse = 1
+        where status_id = #{status_id}
+    </update>
+</mapper>
